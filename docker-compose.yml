@@ -5,12 +5,14 @@ version: '3.4'
 services:
   zookeeper:
    image: confluentinc/cp-zookeeper:7.4.0
+   container_name: zookeeper
    environment:
      ZOOKEEPER_CLIENT_PORT: 2181
      ZOOKEEPER_TICK_TIME: 2000
 
   kafka-1:
     image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-1
     depends_on:
       - zookeeper
     environment:
@@ -23,6 +25,7 @@ services:
   
   kafka-2:
     image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-2
     depends_on:
       - zookeeper
     environment:
@@ -35,6 +38,7 @@ services:
   
   kafka-3:
     image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka-3
     depends_on:
       - zookeeper
     environment:
@@ -44,19 +48,45 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,PLAINTEXT_HOST://localhost:39092
     ports:
       - "39092:39092" 
+  init-kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: init-kafka
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      # blocks until kafka is reachable
+      kafka-topics --bootstrap-server kafka-3:9092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka-1:9092 --create --if-not-exists --topic frames-topic --replication-factor 3 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka-2:9092 --list
+      "
 
   videoframesproducer:
     image: videoframesproducer
+    container_name: videoframesproducer
     build:
       context: .
       dockerfile: video-frames-producer/Dockerfile
     ports:
       - 5115:5115
+    volumes:
+      - "./videos:/app/videos"
+    depends_on:
+      init-kafka: 
+        condition: service_completed_successfully
             
   videoframesconsumer:
     image: videoframesconsumer
     build:
       context: .
       dockerfile: video-frames-consumer/Dockerfile
-    ports:
-      - 5231:5231
+    depends_on:
+      init-kafka: 
+        condition: service_completed_successfully

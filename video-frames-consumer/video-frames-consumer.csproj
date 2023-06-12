@@ -14,5 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="6.0.0" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\video-frames-common\video-frames-common.csproj" />
+  </ItemGroup>
 </Project>
