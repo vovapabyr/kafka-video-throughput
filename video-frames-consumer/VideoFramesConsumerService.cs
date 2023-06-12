@@ -5,26 +5,35 @@ using video_frames_common;
 public class VideoFramesConsumerService : BackgroundService
 {
     private readonly ILogger<VideoFramesConsumerService> _logger;
-    private readonly string _topic;
+    private readonly string _framesTopicName;
+    private readonly string _framesAnalyticTopicName;
     private IConsumer<Ignore, VideoFrame> _kafkaConsumer;
+    private IProducer<Null, VideoFrameStats> _kafkaProducer;
 
     public VideoFramesConsumerService(ILogger<VideoFramesConsumerService> logger, IConfiguration configuration)
     {
         _logger = logger;
-        _topic = configuration["Kafka:Topic"];
-        var config = new ConsumerConfig
+        _framesTopicName = configuration["Kafka:FramesTopicName"];
+        _framesAnalyticTopicName = configuration["Kafka:FramesAnalyticTopicName"];
+        var consumerConfig = new ConsumerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"],
             GroupId = "video-frames",
             AutoOffsetReset = AutoOffsetReset.Earliest,
         };
-        _kafkaConsumer = new ConsumerBuilder<Ignore, VideoFrame>(config).SetValueDeserializer(new VideoFrameDeserializer()).Build();
+        _kafkaConsumer = new ConsumerBuilder<Ignore, VideoFrame>(consumerConfig).SetValueDeserializer(new VideoFrameDeserializer()).Build();
+        var producerConfig = new ProducerConfig()
+        {
+            BootstrapServers = configuration["Kafka:BootstrapServers"]
+        };
+        _kafkaProducer = new ProducerBuilder<Null, VideoFrameStats>(producerConfig).SetValueSerializer(new VideoFrameStatsSerializer()).Build();
     }
 
     public override void Dispose()
     {
         _kafkaConsumer.Close();
         _kafkaConsumer.Dispose();
+        _kafkaProducer.Dispose();
 
         base.Dispose();
     }
@@ -36,15 +45,25 @@ public class VideoFramesConsumerService : BackgroundService
 
     private void StartConsumerLoop(CancellationToken cancellationToken)
     {
-        _kafkaConsumer.Subscribe(_topic);
+        _kafkaConsumer.Subscribe(_framesTopicName);
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 var cr = _kafkaConsumer.Consume(cancellationToken);
+                _kafkaProducer.Produce(_framesAnalyticTopicName, new Message<Null, VideoFrameStats> 
+                {  
+                    Value = new VideoFrameStats()
+                    { 
+                        Index = cr.Message.Value.Index,
+                        Size = Convert.FromBase64String(cr.Message.Value.FrameBase64).Length,
+                        StartTicks = cr.Message.Timestamp.UtcDateTime.Ticks,
+                        EndTicks = DateTime.UtcNow.Ticks
+                    }
+                });
                 Thread.Sleep(100);
-                _logger.LogInformation("Index: '{Index}'. Size(bytes): '{Size}'. Partition: '{Partition}'. Timestamp: '{Timestamp}'.", cr.Message.Value.Index, Convert.FromBase64String(cr.Message.Value.FrameBase64).Length, cr.Partition.Value, cr.Message.Timestamp.UtcDateTime);
+                _logger.LogInformation("Index: '{Index}'. Size(bytes): '{Size}'. Partition: '{Partition}'. Timestamp: '{Timestamp}'.", cr.Message.Value.Index, Convert.FromBase64String(cr.Message.Value.FrameBase64).Length, cr.Partition.Value, cr.Message.Timestamp.Type);
             }
             catch (OperationCanceledException)
             {
@@ -67,5 +86,6 @@ public class VideoFramesConsumerService : BackgroundService
                 break;
             }
         }
+        _kafkaProducer.Flush(cancellationToken);
     }
 }

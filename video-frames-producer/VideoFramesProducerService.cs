@@ -65,6 +65,7 @@ public class VideoFramesProducerService : BackgroundService
                 _logger.LogWarning($"Failed to process message with index: { ex.DeliveryResult.Value.Index }.");
             }
 
+            _kafkaProducer.Flush(cancellationToken);
             _logger.LogInformation($"Finished video processing.");
         }
     }
