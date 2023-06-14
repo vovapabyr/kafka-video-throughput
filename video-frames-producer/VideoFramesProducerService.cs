@@ -13,7 +13,7 @@ public class VideoFramesProducerService : BackgroundService
     public VideoFramesProducerService(ILogger<VideoFramesProducerService> logger, IConfiguration configuration)
     {
         _logger = logger;
-        _topic = configuration["Kafka:Topic"];
+        _topic = configuration["Kafka:FramesTopicName"];
         _videoName = configuration["VideoName"];
         var config = new ProducerConfig()
         {
@@ -48,7 +48,7 @@ public class VideoFramesProducerService : BackgroundService
                 {
                     // Read the next
                     capture.Read(image);
-                    _kafkaProducer.Produce(_topic, new Message<Null, VideoFrame> {  Value = new VideoFrame(){ Index = frameIndex, FrameBase64 = Convert.ToBase64String(image.ToBytes()) }});
+                    _kafkaProducer.Produce(_topic, new Message<Null, VideoFrame> {  Value = new VideoFrame(){ Index = frameIndex, FrameBase64 = Convert.ToBase64String(image.ToBytes()), EventTime = DateTime.UtcNow.Ticks }});
                     // We only want to save every FPS hit since we have 1 image per second -> mod
                     // if (frameIndex % capture.Fps == 0)
                     // {

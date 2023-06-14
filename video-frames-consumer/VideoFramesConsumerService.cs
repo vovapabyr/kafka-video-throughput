@@ -58,12 +58,12 @@ public class VideoFramesConsumerService : BackgroundService
                     { 
                         Index = cr.Message.Value.Index,
                         Size = Convert.FromBase64String(cr.Message.Value.FrameBase64).Length,
-                        StartTicks = cr.Message.Timestamp.UtcDateTime.Ticks,
+                        StartTicks = cr.Message.Value.EventTime,
                         EndTicks = DateTime.UtcNow.Ticks
                     }
                 });
                 Thread.Sleep(100);
-                _logger.LogInformation("Index: '{Index}'. Size(bytes): '{Size}'. Partition: '{Partition}'. Timestamp: '{Timestamp}'.", cr.Message.Value.Index, Convert.FromBase64String(cr.Message.Value.FrameBase64).Length, cr.Partition.Value, cr.Message.Timestamp.Type);
+                _logger.LogInformation("Index: '{Index}'. Size(bytes): '{Size}'. Partition: '{Partition}'. Timestamp: '{Timestamp}'.", cr.Message.Value.Index, Convert.FromBase64String(cr.Message.Value.FrameBase64).Length, cr.Partition.Value, cr.Message.Value.EventTime);
             }
             catch (OperationCanceledException)
             {

@@ -1,0 +1,9 @@
+﻿@model ValueTuple<double, double>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Current Throughput - @Model.Item1.ToString("0.##") Mbps</h1>
+    <h1 class="display-4">Latency - @Model.Item2.ToString("0.###") sec</h1>
+</div>

@@ -5,4 +5,6 @@ public class VideoFrame
     public int Index { get; set; }
 
     public string FrameBase64 { get; set; }
+
+    public long EventTime { get; set; }
 }
