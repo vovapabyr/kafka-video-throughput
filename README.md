@@ -48,3 +48,14 @@ echo -e 'Creating kafka frames-topic topic'
 kafka-topics --bootstrap-server kafka-1:9092 --create --if-not-exists --topic frames-topic --replication-factor 3 --partitions 1
 ```
 And finally, to start the kafka cluster with producer, consumers and analytic services run: ```docker compose up --scale videoframesconsumer=10```, where ```videoframesconsumer=10``` defines number of consumers.  
+## Results
+### 1 partition, 1 consumer [throughput.csv](data/results/1-partition-1-consumer/Throughput.csv),[latency.csv](data/results/1-partition-1-consumer/Latency.csv) ~ 1hr to process 36_000 frames 
+```--partitions 1``` + ```docker compose up --scale videoframesconsumer=1```
+![partitions_consumers](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/0a7fbb9b-5efe-441c-8b44-b9c70eed09f0)
+ - docker resources:
+ ![docker_resources](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/f4bbbb56-4c8c-4dfe-8e06-5f0d2331bf8d)
+ - avg throughput ~ 12 Mbps:
+ ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/92d0f9bd-5bff-458c-8d96-3bbd3ec45e15)
+ - max end-to-end latency ~ 3_000_000 ms -> 3_000 sec -> 50 min:
+ ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/5d631137-8624-414b-b703-84f3041f8c43)
+ 
