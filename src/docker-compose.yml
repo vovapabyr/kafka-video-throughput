@@ -1,7 +1,7 @@
 # Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
 
 version: '3.4'
-
+name: "kafka-throughput"
 services:
   zookeeper:
    image: confluentinc/cp-zookeeper:7.4.0
@@ -80,7 +80,7 @@ services:
     ports:
       - 5115:5115
     volumes:
-      - "./videos:/app/videos"
+      - "../data/videos:/app/videos"
     depends_on:
       init-kafka: 
         condition: service_completed_successfully
