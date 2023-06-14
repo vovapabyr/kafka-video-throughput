@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Data;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using video_frames_analytic.Models;
 
@@ -17,9 +18,37 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var currentThrouput = _analyticStore.GetThroughput();
+        var currentThrouput = _analyticStore.GetAvgThroughput();
         var maxLatency = _analyticStore.GetLatency();
         return View((currentThrouput, maxLatency));
+    }
+
+    [HttpPost]
+    public ActionResult DownloadThroughputCsv()
+    {   
+        _logger.LogInformation("Downloading throughput CSV.");
+        DataTable dataTable = _analyticStore.GetThroughputAsDatatable();
+
+        var output = dataTable.ToCsvByteArray();
+
+        return new FileContentResult(output, "text/csv")
+        {
+            FileDownloadName = "Throughput.csv"
+        };
+    }
+
+    [HttpPost]
+    public ActionResult DownloadLatencyCsv()
+    {   
+        _logger.LogInformation("Downloading latency CSV.");
+        DataTable dataTable = _analyticStore.GetLatencyAsDatatable();
+
+        var output = dataTable.ToCsvByteArray();
+
+        return new FileContentResult(output, "text/csv")
+        {
+            FileDownloadName = "Latency.csv"
+        };
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

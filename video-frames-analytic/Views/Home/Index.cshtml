@@ -4,6 +4,16 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Current Throughput - @Model.Item1.ToString("0.##") Mbps</h1>
-    <h1 class="display-4">Latency - @Model.Item2.ToString("0.###") sec</h1>
+    <h1 class="display-4">Throughput - @Model.Item1.ToString("0.##") Mbps</h1>
+    <h1 class="display-4">Latency - @Model.Item2.ToString("0.###") ms</h1>
+
+    @using (Html.BeginForm("DownloadThroughputCsv", "Home", FormMethod.Post))
+    {   
+        <button type="submit" class="btn btn-success" style="font-size:larger; font-weight:bolder;">Download Throughput CSV</button> 
+    }
+    &nbsp
+    @using (Html.BeginForm("DownloadLatencyCsv", "Home", FormMethod.Post))
+    {   
+        <button type="submit" class="btn btn-success" style="font-size:larger; font-weight:bolder;">Download Latency CSV</button> 
+    }
 </div>
