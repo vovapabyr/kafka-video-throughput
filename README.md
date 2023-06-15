@@ -58,4 +58,15 @@ And finally, to start the kafka cluster with producer, consumers and analytic se
  ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/92d0f9bd-5bff-458c-8d96-3bbd3ec45e15)
  - max end-to-end latency ~ 3_000_000 ms -> 3_000 sec -> 50 min:
  ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/5d631137-8624-414b-b703-84f3041f8c43)
+### 1 partition, 2 consumers [throughput.csv](data/results/1-partition-2-consumers/Throughput.csv),[latency.csv](data/results/1-partition-2-consumers/Latency.csv) ~ 1hr to process 36_000 frames 
+```--partitions 1``` + ```docker compose up --scale videoframesconsumer=2```
+![partitions_consumers](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/48556888-43dc-4dd3-acb3-a2ffcd078800)
+ - docker resources:
+ ![docker_resources](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/95c6de06-0805-4fc9-9b55-6dbd6b214462)
+ - avg throughput ~ 12 Mbps:
+ ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/101e10bd-7009-4ebe-abe3-9e1159af2e2e)
+ - max end-to-end latency ~ 3_000_000 ms -> 3_000 sec -> 50 min:
+ ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/b8e8bfce-e983-456c-9112-890c505cdfd6)
+  As we can see a single partition can be conusmed only by one consumer, that's why one of the consumers doesn't do anything. So, the results should be pretty much the same as in '1 partition, 1 consumer' test case. 
+
  
