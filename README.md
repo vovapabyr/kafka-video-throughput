@@ -87,8 +87,42 @@ And finally, to start the kafka cluster with producer, consumers and analytic se
  ![docker_resources](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/a05e99e2-128b-445e-b47b-67ab4b5c25e0)
  - avg throughput ~ 55 Mbps:
  ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/f24c7a09-0cd8-47f3-b7e3-9704ababb680)
- - max end-to-end latency ~ 10_000 ms -> 10 sec:
+ - althrough, max end-to-end latency ~ 10_000 ms -> 10 sec, we can see that most of the frames' latency were under 2 sec:
  ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/8786a0af-de4e-463c-b1d3-63cc1ed47adf)
-  Again, we made sure the more we parallel data processing the more throughput we get, and thus reduce latency. So, as expected five partitions and five consumers makes the system more than twice faster than '2 partition, 2 consumers' test case. 
+  Again, we made sure the more we parallel data processing the more throughput we get, and thus reduce latency. So, as expected five partitions and five consumers makes the system more than twice faster than '2 partition, 2 consumers' test case.
+### 5. 10 partitions, 1 consumer [throughput.csv](data/results/10-partitions-1-consumer/Throughput.csv), [latency.csv](data/results/10-partitions-1-consumer/Latency.csv) ~ 1hr to process 36_000 frames 
+```--partitions 10``` + ```docker compose up --scale videoframesconsumer=1```
+ ![partitions_consumers](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/43150f26-c3e0-4a3e-947c-8651dbab5341)
+ - docker resources:
+ We can notice that a single consumer reads from all 10 partitions:
+ ![docker_resources](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/6f9d977e-56a1-4cd0-85ef-19f9a4b908d9)
+ - avg throughput ~ 12 Mbps:
+ ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/132d4921-fd72-4a39-814e-2bcba52457ea)
+ - max end-to-end latency ~ 3_000_000 ms -> 3_000 sec -> 50 min:
+ ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/d925f519-9e90-4c3e-bef2-ec05765568d3)
+  We got pretty much the same stats as in '1 partition, 1 consumer' test case and maybe little improvements in avg latency.
+### 6. 10 partitions, 5 consumers [throughput.csv](data/results/10-partitions-5-consumers/Throughput.csv), [latency.csv](data/results/10-partitions-5-consumers/Latency.csv) ~ 12min to process 36_000 frames 
+```--partitions 10``` + ```docker compose up --scale videoframesconsumer=5```
+ ![partitions_consumers](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/a222d9c8-37d7-441c-850d-d257c1931d7b)
+ - docker resources:
+ We can notice that a single consumer reads from 2 partitions:
+ ![docker_resources](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/48f59b2c-1bca-4a8a-9813-523e3c6f5104)
+ - avg throughput ~ 55 Mbps:
+ ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/c1841daa-3f55-4a1f-9f24-ba9fc6de670d)
+ - max end-to-end latency ~ 12_000 ms -> 12 sec:
+ ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/7848b8ff-da68-4048-81c3-9ed6544b868b)
+  Not surprise, but this test case has the similiar stats as in '5 partitions, 5 consumers' test case.
+### 7. 10 partitions, 10 consumers [throughput.csv](data/results/10-partitions-10-conusmers/Throughput.csv), [latency.csv](data/results/10-partitions-10-conusmers/Latency.csv) ~ 12min to process 36_000 frames 
+```--partitions 10``` + ```docker compose up --scale videoframesconsumer=10```
+ ![partitions_consumers](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/31d63720-9ad9-4fcc-9ba7-e16cb8574788)
+ - docker resources:
+ Each consumer ingests messages from a one partition:
+ ![docker_resources](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/9a539dee-0403-46e0-a3d6-f62f5b1ad419)
+ - avg throughput ~ 60 Mbps:
+ ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/8c954f12-fd24-4ec8-a8a4-da500b2c9745)
+ - we can see that almost all messages got latency under 500ms: 
+ ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/3464e5f2-2453-40f9-960c-273c1d90d2ff)
+  I would exepect throughput to be around twice more than '5 patitions, 5 conusmers' test case, but accroding to the stats above it wasn't the case. The reason for that, I think is that we reach the limits of the single producer - a signle producer cannot       produce frames at the rate that 10 consumers can ingest. So, I think adding one more consumer will increase throughput sagnificantly. Also, it worth to mention that with '10 partitions, 10 consumers' we get steady low-latency (300ms).    
+  
 
  
