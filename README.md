@@ -122,7 +122,12 @@ And finally, to start the kafka cluster with producer, consumers and analytic se
  ![throughput](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/8c954f12-fd24-4ec8-a8a4-da500b2c9745)
  - we can see that almost all messages got latency under 500ms: 
  ![latency](https://github.com/vovapabyr/kafka-video-throughput/assets/25819135/3464e5f2-2453-40f9-960c-273c1d90d2ff)
-  I would exepect throughput to be around twice more than '5 patitions, 5 conusmers' test case, but accroding to the stats above it wasn't the case. The reason for that, I think is that we reach the limits of the single producer - a signle producer cannot       produce frames at the rate that 10 consumers can ingest. So, I think adding one more consumer will increase throughput sagnificantly. Also, it worth to mention that with '10 partitions, 10 consumers' we get steady low-latency (300ms).    
+  I would exepect throughput to be around twice more than '5 patitions, 5 conusmers' test case, but accroding to the stats above it wasn't the case. The reason for that, I think is that we reach the limits of the single producer - a signle producer cannot           produce frames at the rate that 10 consumers can ingest. So, I think adding one more consumer will increase throughput sagnificantly. Also, it worth to mention that with '10 partitions, 10 consumers' we get steady low-latency (300ms).
+## Summary
+We demonstrated that in order to increase system's throughput and decrease latency we need to increase number of partitions, which is the main unit of parallelism in kafka. But, just setting the big number of partitions is not enough, the critical point is to consume the data from these partitions effectivly, that's why in perfect scenario we would need the same number of consumers, where each consumer is dedicated to injest messages from a single partition. Also, in '10 partitions, 10 consumers' scenario we could see that the single producer becomes the botteleneck of throughput - single producer couldn't produce messages at the rate that kafka and 10 conumsers can injest, which means system's througput also depends on how quick is producer. So, overall in order to achieve desired throughput and latency in the system all three components needs to be taken into consideration:
+ - throughput of a single producer and a number of producers
+ - number of kafka's partitions
+ - throughpout of a single consumer and a number of consumers
   
 
  
