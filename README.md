@@ -3,7 +3,7 @@
 The main idea of this project is to investigate kafka throughput with sending video frames and see how number of partitions and parallel consumers affect it. By default, this setup configure kafka cluster with three nodes and zookeeper. It also starts [producer](src/video-frames-producer), configured number of [consumers](src/video-frames-consumer) and [analytic](src/video-frames-analytic) service. The data flow is next: 
  - prodcuer sends each frame of the video to kafka cluster 
  - consumers read the frames and sends frame metadata (index, size, ...) to another topic of the kafka cluster 
- - analytic service reads the frames' metadata from the kafka, calculates analytics (throughput and latency) and store in memmory
+ - analytic service reads the frames' metadata from the kafka, calculates analytics (throughput and latency) and store in memory
  - once the video is processed, user can go to the home page of the analytic service and download the analytic's data (throughput and latency) in csv files.
 
 Also during processing, home page of analytic service display system's current throughput and latency. Charts displayed in Results section was built with the help of (https://www.csvplot.com/), where csv files could be uploaded. 
